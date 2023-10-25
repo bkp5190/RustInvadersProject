@@ -1,5 +1,10 @@
-use std::{error::Error, ops::Add};
+use std::{error::Error, io, ops::Add};
 
+use crossterm::{
+    cursor::{Hide, Show},
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
+};
 use rusty_audio::Audio;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -12,7 +17,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     audio.add("win", "win.wav");
     audio.play("startup");
 
+    // Terminal
+    let mut stdout = io::stdout();
+    terminal::enable_raw_mode()?;
+    stdout.execute(EnterAlternateScreen)?;
+    stdout.execute(Hide);
     // Cleanup
     audio.wait();
+    stdout.execute(Show)?;
+    stdout.execute(LeaveAlternateScreen);
     Ok(())
 }
